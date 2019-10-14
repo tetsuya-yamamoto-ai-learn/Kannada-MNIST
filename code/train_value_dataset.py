@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 
 
 class Train_value_dataset(Dataset):
@@ -11,7 +11,7 @@ class Train_value_dataset(Dataset):
         return len(self.X)
 
     def __getitem__(self, idx):
-        return self.X[idx].type(torch.float32), self.y[idx]
+        return self.X[idx], self.y[idx]
 
 
 def main():
@@ -29,6 +29,12 @@ def main():
     assert torch.Size([784]) == X.size()
     assert torch.float32 == X.dtype
     assert 1.0 == y
+
+    # DataLoaderに使用可能か確認
+    BATCH_SIZE = 2
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    for images, labels in train_loader:
+        print(images.size(), labels.size())
 
 
 if __name__ == '__main__':
