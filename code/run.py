@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
+from torch import nn
 from torch.utils.data import DataLoader
 
 from code.MyNet import MySimplenet
@@ -47,6 +48,21 @@ def run():
     # =========================================================== #
     # 3. ネットワークの学習(Model, nn.model)
     # =========================================================== #
+
+    # 最適化手法の設定(ネットワークのパラメータを渡す必要あり)
+    optimizer = torch.optim.Adam(model.parameters())
+    # print(len(list(model.parameters())[0])) # (784, 196)...一層目の重み？
+    # print(len(list(model.parameters())[1])) # (196, )...一層目のバイアス？
+    # print(len(list(model.parameters())[2])) # (196, 49)
+    # print(len(list(model.parameters())[3])) # (49, )
+    # print(len(list(model.parameters())[4])) # (49, 10)
+    # print(len(list(model.parameters())[5])) # (10, )
+
+    # 損失関数の設定
+    criterion = nn.CrossEntropyLoss()
+
+
+
 
     # =========================================================== #
     # 4. テストデータの識別
