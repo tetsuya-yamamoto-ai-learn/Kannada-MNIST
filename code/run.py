@@ -6,6 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from code.MyNet import MySimplenet
+from code.plot_methods import loss_plot
 from code.test_dataset import Test_Dataset
 from code.train_value_dataset import Train_value_dataset
 
@@ -16,14 +17,14 @@ def run():
     # =========================================================== #
 
     torch.manual_seed(0)  # torchの初期化
-    BATCH_SIZE = 100  # バッチ数
+    BATCH_SIZE = 10000  # バッチ数
 
     # =========================================================== #
     # 1. データセットの準備(DatasetとDataloader)
     # =========================================================== #
 
     # DatasetとDataloaderを作成するために訓練データを読み込む
-    train = pd.read_csv('../input/train.csv', nrows=1000)
+    train = pd.read_csv('../input/train.csv')
 
     # ラベルとデータに分割する(.valuesでndarrayにすることが重要！！)
     X = train.iloc[:, 1:].values
@@ -45,7 +46,7 @@ def run():
     # =========================================================== #
 
     # 自分で定義したMySimplenetをインスタンス化
-    model = MySimplenet()
+    model: nn.Module = MySimplenet()
 
     # =========================================================== #
     # 3. ネットワークの学習(Model, nn.model)
@@ -64,7 +65,7 @@ def run():
     criterion = nn.CrossEntropyLoss()
 
     # 学習の実施
-    NUM_EPOCHS = 1
+    NUM_EPOCHS = 10
     model.train()
     loss_list = []
     for epochs in range(1, NUM_EPOCHS + 1):
@@ -86,7 +87,21 @@ def run():
             optimizer.step()
 
     # 損失関数の変化をグラフ表示
-    # loss_plot(loss_list)
+    loss_plot(loss_list)
+
+    # =========================================================== #
+    # (検証データを用いて精度を確認)
+    # =========================================================== #
+    model.eval()
+    bool = np.array([])
+    for images, labels in valid_loader:
+        y_valid_pred = model(images)
+        _, y_valid_pred_labels = torch.max(y_valid_pred, dim=1)
+
+        bool = np.append(bool, y_valid_pred_labels.numpy() == labels.numpy())
+
+    df_bool = pd.DataFrame(bool)
+    print(df_bool.sum() / len(df_bool))
 
     # =========================================================== #
     # 4. テストデータの識別
