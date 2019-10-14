@@ -5,6 +5,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from code.MyNet import MySimplenet
+from code.plot_methods import loss_plot
 from code.train_value_dataset import Train_value_dataset
 
 
@@ -14,14 +15,14 @@ def run():
     # =========================================================== #
 
     torch.manual_seed(0)  # torchの初期化
-    BATCH_SIZE = 100  # バッチ数
+    BATCH_SIZE = 10000  # バッチ数
 
     # =========================================================== #
     # 1. データセットの準備(DatasetとDataloader)
     # =========================================================== #
 
     # DatasetとDataloaderを作成するために訓練データを読み込む
-    train = pd.read_csv('../input/train.csv', nrows=1000)
+    train = pd.read_csv('../input/train.csv')
 
     # ラベルとデータに分割する(.valuesでndarrayにすることが重要！！)
     X = train.iloc[:, 1:].values
@@ -61,8 +62,29 @@ def run():
     # 損失関数の設定
     criterion = nn.CrossEntropyLoss()
 
+    # 学習の実施
+    NUM_EPOCHS = 10
+    model.train()
+    loss_list = []
+    for epochs in range(1, NUM_EPOCHS + 1):
+        for images, labels in train_loader:
+            # 勾配初期化
+            optimizer.zero_grad()
 
+            # 順伝搬
+            outputs = model.forward(images)
 
+            # 損失計算
+            loss = criterion(outputs, labels)
+            loss_list.append(loss.item())
+
+            # 逆伝搬(勾配計算)
+            loss.backward()
+
+            # パラメータ更新
+            optimizer.step()
+
+    loss_plot(loss_list)
 
     # =========================================================== #
     # 4. テストデータの識別
