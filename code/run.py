@@ -3,6 +3,7 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
+from code.MyNet import MySimplenet
 from code.train_value_dataset import Train_value_dataset
 
 
@@ -36,12 +37,12 @@ def run():
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-    for images, labels in train_loader:
-        print(images.size(), labels.size())
-
     # =========================================================== #
     # 2. ネットワークの準備(My_simple_net)
     # =========================================================== #
+
+    # 自分で定義したMySimplenetをインスタンス化
+    model = MySimplenet()
 
     # =========================================================== #
     # 3. ネットワークの学習(Model, nn.model)
