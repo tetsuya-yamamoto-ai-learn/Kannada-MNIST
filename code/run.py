@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
@@ -5,6 +6,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from code.MyNet import MySimplenet
+from code.test_dataset import Test_Dataset
 from code.train_value_dataset import Train_value_dataset
 
 
@@ -90,15 +92,36 @@ def run():
     # 4. テストデータの識別
     # =========================================================== #
 
+    # テストデータの読み込み
     test = pd.read_csv('../input/test.csv')
 
-    test_id = test.iloc[:, 0]
+    # データidとテストデータの分割
+    id_test = test.iloc[:, 0]
     X_test = test.iloc[:, 1:].values
 
+    # テストデータセット
+    test_dataset = Test_Dataset(X_test)
+
+    # テストデータセットローダー
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+    # 推測の実施
+    model.eval()
+    predictions = np.array([], dtype=int)
+    for images in test_loader:
+        # データの予測
+        y_pred = model(images)
+
+        # 最大値のラベルの取得
+        _, y_pred_label = torch.max(y_pred, dim=1)
+        predictions = np.append(predictions, y_pred_label.numpy())
 
     # =========================================================== #
     # 5. 識別結果の出力
     # =========================================================== #
+    test_csv = pd.DataFrame(id_test)
+    test_csv['Label'] = predictions
+    test_csv.to_csv('../output/01_Simple_submission', index=False)
 
 
 if __name__ == '__main__':
