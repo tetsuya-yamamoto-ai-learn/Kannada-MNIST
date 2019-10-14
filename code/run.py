@@ -2,6 +2,8 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 
+from code.train_value_dataset import Train_value_dataset
+
 
 def run():
     # =========================================================== #
@@ -9,14 +11,14 @@ def run():
     # =========================================================== #
 
     torch.manual_seed(0)  # torchの初期化
-    BATCH_SIZE = 1000  # バッチ数
+    BATCH_SIZE = 100  # バッチ数
 
     # =========================================================== #
     # 1. データセットの準備(DatasetとDataloader)
     # =========================================================== #
 
     # DatasetとDataloaderを作成するために訓練データを読み込む
-    train = pd.read_csv('../input/train.csv', nrows=100)
+    train = pd.read_csv('../input/train.csv', nrows=1000)
 
     # ラベルとデータに分割する
     X = train.iloc[:, 1:]
@@ -24,8 +26,10 @@ def run():
 
     # 訓練データと検証データに分割する
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.3, random_state=0)
-    assert (70, 784) == X_train.shape
-    assert (70,) == y_train.shape
+
+    # データセットの作成
+    train_dataset = Train_value_dataset(X_train, y_train)
+    valid_dataset = Train_value_dataset(X_valid, y_valid)
 
     # =========================================================== #
     # 2. ネットワークの準備(My_simple_net)
